@@ -115,7 +115,7 @@ public final class SubTrack {
 
         for await result in Transaction.currentEntitlements {
             if let transaction = try? checkVerified(result) {
-                transactionIds.append(String(transaction.id))
+                transactionIds.append(String(transaction.originalID))
                 await transaction.finish()
             }
         }
