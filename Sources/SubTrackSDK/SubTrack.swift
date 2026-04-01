@@ -90,7 +90,7 @@ public final class SubTrack {
             try await api.validateTransaction(
                 userId: userId,
                 projectId: projectId,
-                transactionId: String(transaction.id),
+                transactionId: String(transaction.originalID),
                 productId: product.storeProduct.id,
                 environment: environment
             )
