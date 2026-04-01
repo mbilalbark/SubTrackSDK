@@ -83,19 +83,24 @@ public final class SubTrack {
 
         switch result {
         case .success(let verification):
-            let transaction = try checkVerified(verification)
-            let environment = transaction.environment == .xcode || transaction.environment == .sandbox
-                ? "sandbox" : "production"
+            do {
+                let transaction = try checkVerified(verification)
+                let environment = transaction.environment == .xcode || transaction.environment == .sandbox
+                    ? "sandbox" : "production"
 
-            try await api.validateTransaction(
-                userId: userId,
-                projectId: projectId,
-                transactionId: String(transaction.originalID),
-                productId: product.storeProduct.id,
-                environment: environment
-            )
+                try await api.validateTransaction(
+                    userId: userId,
+                    projectId: projectId,
+                    transactionId: String(transaction.originalID),
+                    productId: product.storeProduct.id,
+                    environment: environment
+                )
 
-            await transaction.finish()
+                await transaction.finish()
+            } catch {
+                print("❌ SubTrack Purchase Error: \(error)")
+                throw error
+            }
 
         case .userCancelled:
             throw STError.purchaseCancelled
@@ -127,7 +132,7 @@ public final class SubTrack {
             transactionIds: transactionIds
         )
 
-        return response?.entitled ?? false
+        return response.entitled
     }
 
     // MARK: - Private

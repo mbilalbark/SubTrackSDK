@@ -129,10 +129,13 @@ final class SubTrackAPI {
         return data
     }
 
-    private func validateResponse(_ response: URLResponse) throws {
-        guard let http = response as? HTTPURLResponse,
-              (200...299).contains(http.statusCode) else {
+   private func validateResponse(_ response: URLResponse) throws {
+        guard let http = response as? HTTPURLResponse else {
             throw STError.networkError(URLError(.badServerResponse))
+        }
+        guard (200...299).contains(http.statusCode) else {
+            throw STError.networkError(NSError(domain: "SubTrack", code: http.statusCode, 
+                userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode)"]))
         }
     }
 }
