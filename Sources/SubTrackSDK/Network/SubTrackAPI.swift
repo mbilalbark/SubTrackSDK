@@ -77,7 +77,7 @@ final class SubTrackAPI {
         userId: String,
         projectId: String,
         transactionIds: [String]
-    ) async throws -> STAPIEntitlementResponse? {
+    ) async throws -> STAPIEntitlementResponse {  // ← ? kaldır
         let url = try makeURL("/api/sdk/restore")
         let body: [String: Any] = [
             "user_id": userId,
@@ -85,7 +85,7 @@ final class SubTrackAPI {
             "transaction_ids": transactionIds
         ]
         let data = try await postWithResponse(url: url, body: body)
-        return try? JSONDecoder().decode(STAPIEntitlementResponse.self, from: data)
+        return try JSONDecoder().decode(STAPIEntitlementResponse.self, from: data)
     }
 
     // MARK: - Private Helpers
