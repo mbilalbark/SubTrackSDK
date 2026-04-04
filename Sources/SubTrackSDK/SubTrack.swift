@@ -134,6 +134,20 @@ public final class SubTrack {
 
         return response.entitled
     }
+    
+    public func syncExistingSubscriptions() async {
+        for await result in Transaction.currentEntitlements {
+            if let transaction = try? checkVerified(result) {
+                try? await api.validateTransaction(
+                    userId: userId,
+                    projectId: projectId,
+                    transactionId: String(transaction.originalID),
+                    productId: transaction.productID,
+                    environment: transaction.environment == .sandbox ? "sandbox" : "production"
+                )
+            }
+        }
+    }
 
     // MARK: - Private
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
