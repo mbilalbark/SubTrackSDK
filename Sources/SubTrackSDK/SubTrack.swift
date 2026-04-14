@@ -103,11 +103,14 @@ public final class SubTrack {
 
         switch result {
         case .success(let verification):
+            let transaction = try checkVerified(verification)
+            
+            // Backend'e sync et ama başarısız olursa hata fırlatma
+            // Kullanıcı ödemeyi yaptı, Apple onayladı — premium olmalı
+            let environment = transaction.environment == .xcode || transaction.environment == .sandbox
+                ? "sandbox" : "production"
+            
             do {
-                let transaction = try checkVerified(verification)
-                let environment = transaction.environment == .xcode || transaction.environment == .sandbox
-                    ? "sandbox" : "production"
-
                 try await api.validateTransaction(
                     userId: userId,
                     projectId: projectId,
@@ -115,12 +118,12 @@ public final class SubTrack {
                     productId: product.storeProduct.id,
                     environment: environment
                 )
-
-                await transaction.finish()
             } catch {
-                print("❌ SubTrack Purchase Error: \(error)")
-                throw error
+                print("⚠️ SubTrack backend sync failed: \(error)")
+                // Hata fırlatmıyoruz — Apple onayladıysa premium
             }
+
+            await transaction.finish()
 
         case .userCancelled:
             throw STError.purchaseCancelled
