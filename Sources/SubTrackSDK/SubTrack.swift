@@ -76,6 +76,26 @@ public final class SubTrack {
         return response.entitled
     }
 
+    /// Cihazda Apple'a sorarak premium durumunu kontrol eder
+    /// Backend'e bağımlı değil
+    public func checkEntitlementLocal(productIds: [String]) async -> Bool {
+        for await result in Transaction.currentEntitlements {
+            if let transaction = try? checkVerified(result) {
+                if productIds.contains(transaction.productID) {
+                    if let expirationDate = transaction.expirationDate {
+                        if expirationDate > Date() {
+                            return true
+                        }
+                    } else {
+                        // expirationDate nil = lifetime
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
     // MARK: - Purchase
     /// Ürünü satın alır ve backend'e bildirir
     public func purchase(_ product: STProduct) async throws {
